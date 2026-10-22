@@ -55,17 +55,12 @@ export function Sidebar() {
         <div className="flex flex-col gap-8">
           {/* Brand Logo */}
           <div className="flex items-center gap-3 px-2">
-            <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-[#ff5530] text-white shadow-md shadow-[#ff5530]/25">
+            <div className="flex h-9 w-9 items-center justify-center rounded-xl text-white shadow-md shadow-[#ff5530]/25">
               {/* Metric Flow geometric icon */}
-              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                <circle cx="7" cy="7" r="2.5" fill="white" />
-                <circle cx="17" cy="7" r="2.5" fill="white" />
-                <circle cx="12" cy="17" r="2.5" fill="white" />
-                <path d="M7 7L17 7L12 17Z" stroke="white" strokeWidth="1.5" strokeLinejoin="round" />
-              </svg>
+<img src="/logo.png" alt="Redline" />
             </div>
             <span className="text-[17px] font-bold tracking-tight text-white">
-              Metric Flow
+              Redline
             </span>
           </div>
 
