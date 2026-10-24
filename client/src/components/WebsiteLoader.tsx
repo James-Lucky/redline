@@ -56,7 +56,7 @@ export function WebsiteLoader() {
       <div className="pointer-events-none absolute h-60 w-60 rounded-full bg-[#ff5530]/10 blur-[80px]" />
 
       <div className="relative flex flex-col items-center">
-        {/* User's Redline Brand Logo */}
+        {/* Redline Brand Logo */}
         <div className="relative flex h-16 w-16 items-center justify-center">
           <div className="absolute inset-0 rounded-full bg-[#ff5530]/20 blur-md" />
           <img
@@ -88,3 +88,5 @@ export function WebsiteLoader() {
     </div>
   );
 }
+
+export default WebsiteLoader;

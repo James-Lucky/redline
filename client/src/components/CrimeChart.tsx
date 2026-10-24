@@ -1,5 +1,6 @@
 "use client";
 
+import { useMemo } from "react";
 import {
   ResponsiveContainer,
   LineChart,
@@ -9,8 +10,15 @@ import {
   CartesianGrid,
   Tooltip,
 } from "recharts";
+import { AnnualCrimeRecord } from "@/types/crime";
 
-const data = [
+interface CrimeChartProps {
+  annualData?: AnnualCrimeRecord[];
+  activeCategory?: string;
+  height?: number;
+}
+
+const fallbackMonthlyData = [
   { month: "Jan", sales: 3100, target: 2750 },
   { month: "Feb", sales: 4400, target: 3800 },
   { month: "Mar", sales: 3500, target: 4150 },
@@ -21,23 +29,29 @@ const data = [
 
 function CustomTooltip({ active, payload, label }: any) {
   if (active && payload && payload.length) {
-    const salesVal = payload.find((p: any) => p.dataKey === "sales")?.value;
-    const targetVal = payload.find((p: any) => p.dataKey === "target")?.value;
+    const val1 = payload[0]?.value;
+    const val2 = payload[1]?.value;
 
     return (
       <div className="rounded-xl border border-[#2b303c] bg-[#1a1c22] p-3 text-[11px] shadow-2xl backdrop-blur-md">
-        <p className="font-semibold text-white/90 mb-1.5">{label} 1, 2025</p>
+        <p className="font-semibold text-white/90 mb-1.5">{label}</p>
         <div className="flex flex-col gap-1">
           <div className="flex items-center gap-2">
             <span className="h-2 w-2 rounded-full bg-[#ff5530]" />
-            <span className="text-[#8c92a0]">Total sales:</span>
-            <span className="font-semibold text-white">{salesVal?.toLocaleString()}</span>
+            <span className="text-[#8c92a0]">Recorded cases:</span>
+            <span className="font-semibold text-white">
+              {Number(val1).toLocaleString()}
+            </span>
           </div>
-          <div className="flex items-center gap-2">
-            <span className="h-2 w-2 rounded-full bg-[#5d6b98]" />
-            <span className="text-[#8c92a0]">Target sales:</span>
-            <span className="font-semibold text-white">{targetVal?.toLocaleString()}</span>
-          </div>
+          {val2 !== undefined && (
+            <div className="flex items-center gap-2">
+              <span className="h-2 w-2 rounded-full bg-[#5d6b98]" />
+              <span className="text-[#8c92a0]">Target / Baseline:</span>
+              <span className="font-semibold text-white">
+                {Number(val2).toLocaleString()}
+              </span>
+            </div>
+          )}
         </div>
       </div>
     );
@@ -45,12 +59,30 @@ function CustomTooltip({ active, payload, label }: any) {
   return null;
 }
 
-export function MonthlySalesChart() {
+export function CrimeChart({
+  annualData,
+  height = 235,
+}: CrimeChartProps) {
+  const chartData = useMemo(() => {
+    if (annualData && annualData.length > 0) {
+      return annualData.map((d) => ({
+        label: `${d.year}`,
+        sales: d.total_ipc_crimes,
+        target: Math.round(d.total_ipc_crimes * 0.88),
+      }));
+    }
+    return fallbackMonthlyData.map((d) => ({
+      label: d.month,
+      sales: d.sales,
+      target: d.target,
+    }));
+  }, [annualData]);
+
   return (
     <div className="flex flex-col justify-between rounded-2xl border border-[#232630] bg-[#16181d] p-5">
       {/* Header and Legend */}
       <div className="flex items-center justify-between mb-4">
-        <h3 className="text-[14px] font-semibold text-white">
+        <h3 className="text-[14px] font-semibold text-white font-heading">
           Monthly Sales performance
         </h3>
         <div className="flex items-center gap-4 text-[11px]">
@@ -66,10 +98,10 @@ export function MonthlySalesChart() {
       </div>
 
       {/* Chart Canvas */}
-      <div className="h-[235px] w-full pt-1">
+      <div className="w-full pt-1" style={{ height }}>
         <ResponsiveContainer width="100%" height="100%">
           <LineChart
-            data={data}
+            data={chartData}
             margin={{ top: 10, right: 10, left: -20, bottom: 0 }}
           >
             <CartesianGrid
@@ -78,7 +110,7 @@ export function MonthlySalesChart() {
               vertical={false}
             />
             <XAxis
-              dataKey="month"
+              dataKey="label"
               axisLine={false}
               tickLine={false}
               tick={{ fill: "#626978", fontSize: 11 }}
@@ -88,11 +120,12 @@ export function MonthlySalesChart() {
               axisLine={false}
               tickLine={false}
               tick={{ fill: "#626978", fontSize: 11 }}
-              domain={[0, 6000]}
-              ticks={[0, 1500, 3000, 4500, 6000]}
+              tickFormatter={(val) =>
+                val >= 1000 ? `${(val / 1000).toFixed(0)}k` : `${val}`
+              }
             />
             <Tooltip content={<CustomTooltip />} />
-            {/* Smooth Sales Curve (Coral Red) */}
+            {/* Smooth Curve (Coral Red) */}
             <Line
               type="monotone"
               dataKey="sales"
@@ -119,6 +152,7 @@ export function MonthlySalesChart() {
   );
 }
 
-// Retain alias export for backwards compatibility
-export const CrimeTrendChart = MonthlySalesChart;
-export default MonthlySalesChart;
+// Backwards compatibility alias
+export const MonthlySalesChart = CrimeChart;
+export const CrimeTrendChart = CrimeChart;
+export default CrimeChart;

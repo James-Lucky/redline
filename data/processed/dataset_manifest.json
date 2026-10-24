@@ -1,0 +1,55 @@
+{
+  "generated_at": "2026-10-22T17:39:12.283560",
+  "application": "CrimeLens Delhi",
+  "description": "Public police-recorded crime statistics registry and boundary provenance",
+  "datasets": [
+    {
+      "id": "delhi_district_crime_2013",
+      "title": "District-Wise IPC Crimes in Delhi (2013)",
+      "publisher": "National Crime Records Bureau (NCRB), Ministry of Home Affairs, Government of India",
+      "publication_year": 2014,
+      "reporting_period": "Calendar Year 2013 (Jan 1, 2013 \u2013 Dec 31, 2013)",
+      "geography_type": "police_district",
+      "temporal_coverage": "2013",
+      "granularity": "Delhi Police Districts (11 territorial units + 7 specialized/railway units)",
+      "source_file": "data/raw/crime/dstrIPC_2013.csv",
+      "source_url": "https://data.gov.in/resource/district-wise-crimes-committed-against-property-and-persons-2013",
+      "row_count": 18,
+      "validation_status": "verified",
+      "completeness": "100% of reported Delhi police jurisdictions",
+      "audit_notes": "Preserves original NCRB column headers alongside normalized indicators. Distinguishes territorial police districts from specialized units (CAW, Crime Branch, EOW, GRP, Metro, IGI, STF)."
+    },
+    {
+      "id": "delhi_crime_annual_series",
+      "title": "Annual IPC Crime Trends in Delhi (2013\u20132022)",
+      "publisher": "National Crime Records Bureau (NCRB), Ministry of Home Affairs, Government of India",
+      "publication_year": 2023,
+      "reporting_period": "Annual 2013\u20132022",
+      "geography_type": "state_ut",
+      "temporal_coverage": "2013-2022 (10 annual periods)",
+      "granularity": "National Capital Territory of Delhi (State/UT Level)",
+      "source_file": "Official NCRB Crime in India Compendia (2013-2022)",
+      "source_url": "https://ncrb.gov.in/crime-in-india.html",
+      "row_count": 10,
+      "validation_status": "verified",
+      "completeness": "Complete 10-year official annual time series",
+      "audit_notes": "Documents critical administrative shifts: 2014 e-FIR registration portal launch, 2017 district bifurcation, and 2020 pandemic lockdown impacts."
+    },
+    {
+      "id": "delhi_administrative_boundaries",
+      "title": "Delhi Revenue & Administrative District Boundaries",
+      "publisher": "Survey of India (SOI) / National Water Informatics Centre (NWIC)",
+      "publication_year": 2019,
+      "reporting_period": "2011 Census Administrative Framework",
+      "geography_type": "administrative_district",
+      "temporal_coverage": "Current official SOI administrative boundaries",
+      "granularity": "11 Revenue Districts (Central, East, New Delhi, North, North East, North West, Shahdara, South, South East, South West, West)",
+      "source_file": "data/raw/boundaries/district_nwic.GeoJSON",
+      "source_url": "https://nwic.gov.in/",
+      "row_count": 11,
+      "validation_status": "verified",
+      "completeness": "11 of 11 administrative revenue districts present with valid polygon geometry",
+      "audit_notes": "Important: Police districts and Revenue districts are not 1:1 coterminous. For example, Shahdara was created administratively in 2012 but was not reported as a separate police district in the 2013 NCRB report; Outer is a police district with no direct revenue district counterpart."
+    }
+  ]
+}

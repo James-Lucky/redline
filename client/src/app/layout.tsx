@@ -19,16 +19,19 @@ const inter = Inter({
 
 export const metadata: Metadata = {
   title: "Redline",
+  description:
+    "Real-time analytics dashboard featuring crime statistics, telemetry heatmaps, district breakdowns, and source-grounded AI assistant.",
   icons: {
     icon: [
-      { url: "/logo.png" },
+      { url: "/logo.png", type: "image/png" },
       { url: "/logo.png", sizes: "16x16", type: "image/png" },
       { url: "/logo.png", sizes: "32x32", type: "image/png" },
+      { url: "/logo.png", sizes: "192x192", type: "image/png" },
+      { url: "/logo.png", sizes: "512x512", type: "image/png" },
     ],
-    apple: [{ url: "/logo.png" }],
+    shortcut: "/logo.png",
+    apple: [{ url: "/logo.png", sizes: "180x180", type: "image/png" }],
   },
-  description:
-    "Real-time sales analytics dashboard featuring sales performance, order heatmaps, top products, country breakdowns, and AI assistant.",
 };
 
 export default function RootLayout({
@@ -40,6 +43,11 @@ export default function RootLayout({
       suppressHydrationWarning
       className={`dark ${inter.variable} ${manrope.variable}`}
     >
+      <head>
+        <link rel="icon" href="/logo.png" type="image/png" />
+        <link rel="shortcut icon" href="/logo.png" type="image/png" />
+        <link rel="apple-touch-icon" href="/logo.png" />
+      </head>
       <body
         suppressHydrationWarning
         className="bg-[#0e1013] text-white antialiased selection:bg-[#ff5530]/30 selection:text-white min-h-screen"
@@ -50,6 +58,3 @@ export default function RootLayout({
     </html>
   );
 }
-
-
-

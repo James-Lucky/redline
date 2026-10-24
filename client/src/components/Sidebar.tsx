@@ -1,13 +1,13 @@
 "use client";
 
 import { useState } from "react";
+import Link from "next/link";
+import { usePathname } from "next/navigation";
 import {
-  LayoutDashboard,
-  ShoppingCart,
-  Package,
-  Users,
-  BarChart2,
-  Megaphone,
+  MapPin,
+  TrendingUp,
+  Database,
+  BookOpen,
   Settings,
   HelpCircle,
   Menu,
@@ -15,16 +15,14 @@ import {
 } from "lucide-react";
 
 const navItems = [
-  { label: "Dashboard", icon: LayoutDashboard },
-  { label: "Orders", icon: ShoppingCart },
-  { label: "Products", icon: Package },
-  { label: "Customers", icon: Users },
-  { label: "Analysis", icon: BarChart2 },
-  { label: "Marketing", icon: Megaphone },
+  { href: "/", label: "Districts", icon: MapPin },
+  { href: "/trends", label: "Crime Trends", icon: TrendingUp },
+  { href: "/sources", label: "Data Sources", icon: Database },
+  { href: "/methodology", label: "Methodology", icon: BookOpen },
 ];
 
 export function Sidebar() {
-  const [active, setActive] = useState("Dashboard");
+  const pathname = usePathname();
   const [mobileOpen, setMobileOpen] = useState(false);
 
   return (
@@ -53,28 +51,39 @@ export function Sidebar() {
         }`}
       >
         <div className="flex flex-col gap-8">
-          {/* Brand Logo */}
-          <div className="flex items-center gap-3 px-2">
+          {/* Brand Logo & Title */}
+          <Link
+            href="/"
+            onClick={() => setMobileOpen(false)}
+            className="flex items-center gap-3 px-2 group"
+          >
             <div className="flex h-9 w-9 items-center justify-center rounded-xl text-white shadow-md shadow-[#ff5530]/25">
-              {/* Metric Flow geometric icon */}
-<img src="/logo.png" alt="Redline" />
+              <img
+                src="/logo.png"
+                alt="Redline"
+                className="h-8 w-8 object-contain"
+              />
             </div>
-            <span className="text-[17px] font-bold tracking-tight text-white">
-              Redline
-            </span>
-          </div>
+            <div>
+              <span className="text-[17px] font-bold tracking-tight text-white block leading-tight font-heading">
+                Redline
+              </span>
+              <span className="text-[10px] text-[#ff5530] font-medium block">
+                Delhi Districts
+              </span>
+            </div>
+          </Link>
 
           {/* Navigation Items */}
           <nav className="flex flex-col gap-1.5" aria-label="Main Navigation">
-            {navItems.map(({ label, icon: Icon }) => {
-              const isActive = active === label;
+            {navItems.map(({ href, label, icon: Icon }) => {
+              const isActive =
+                href === "/" ? pathname === "/" : pathname.startsWith(href);
               return (
-                <button
-                  key={label}
-                  onClick={() => {
-                    setActive(label);
-                    setMobileOpen(false);
-                  }}
+                <Link
+                  key={href}
+                  href={href}
+                  onClick={() => setMobileOpen(false)}
                   className={`flex items-center gap-3.5 rounded-xl px-3.5 py-2.5 text-[13px] font-medium transition-all ${
                     isActive
                       ? "bg-[#281f21] text-[#ff5530]"
@@ -86,7 +95,7 @@ export function Sidebar() {
                     className={isActive ? "text-[#ff5530]" : "text-[#8d939e]"}
                   />
                   <span>{label}</span>
-                </button>
+                </Link>
               );
             })}
           </nav>
@@ -94,16 +103,24 @@ export function Sidebar() {
 
         {/* Bottom Section */}
         <div className="flex flex-col gap-1.5 pt-6 border-t border-[#20232b]">
-          <button className="flex items-center gap-3.5 rounded-xl px-3.5 py-2.5 text-[13px] font-medium text-[#8d939e] transition-all hover:bg-[#1a1c22] hover:text-white">
+          <Link
+            href="/sources"
+            className="flex items-center gap-3.5 rounded-xl px-3.5 py-2.5 text-[13px] font-medium text-[#8d939e] transition-all hover:bg-[#1a1c22] hover:text-white"
+          >
             <Settings size={18} />
             <span>Settings</span>
-          </button>
-          <button className="flex items-center gap-3.5 rounded-xl px-3.5 py-2.5 text-[13px] font-medium text-[#8d939e] transition-all hover:bg-[#1a1c22] hover:text-white">
+          </Link>
+          <Link
+            href="/methodology"
+            className="flex items-center gap-3.5 rounded-xl px-3.5 py-2.5 text-[13px] font-medium text-[#8d939e] transition-all hover:bg-[#1a1c22] hover:text-white"
+          >
             <HelpCircle size={18} />
             <span>Help Center</span>
-          </button>
+          </Link>
         </div>
       </aside>
     </>
   );
 }
+
+export default Sidebar;

@@ -1,0 +1,11 @@
+year,total_ipc_crimes,murder,rape,robbery,burglary,theft,kidnapping_abduction,riots,cheating,assault_on_women_modesty,source,coverage,procedural_warning
+2013,80184,517,1636,1245,2835,30124,6294,113,2899,3515,NCRB Crime in India - 2013 (Table 1.8 & District dstrIPC),full_year,Standard physical police station reporting; baseline pre-online FIR.
+2014,155654,586,2096,6481,10306,50570,4034,104,3410,4322,NCRB Crime in India - 2014 (Table 1.1),full_year,"Reporting shift: Delhi Police launched e-FIR portal for motor vehicles & property theft, leading to significant increase in registered complaints."
+2015,182644,570,2199,7407,13549,79056,4290,73,4120,5367,NCRB Crime in India - 2015,full_year,Continued high electronic registration of property thefts.
+2016,199110,528,2155,4774,13915,99654,4058,71,4625,4165,NCRB Crime in India - 2016,full_year,New police district boundaries proposed in late 2016; operational in 2017.
+2017,223077,487,2129,2901,14210,135824,3905,60,4830,3422,NCRB Crime in India - 2017,full_year,Delhi Police reorganized into 13 police districts (Rohini & Shahdara added).
+2018,236476,477,2135,2307,15420,149230,4052,45,5120,3340,NCRB Crime in India - 2018,full_year,Reorganization of police district jurisdictions fully effective.
+2019,299475,521,1253,1956,14358,212560,3672,71,5410,2921,NCRB Crime in India - 2019,full_year,Online FIR system expanded for general house theft and mobile loss.
+2020,245844,472,1699,1972,13245,161821,3073,680,4890,2010,NCRB Crime in India - 2020,full_year,COVID-19 pandemic strict nationwide lockdowns reduced physical movement; Northeast Delhi civil riots caused spike in rioting cases.
+2021,287178,459,1250,2334,14592,198902,3698,85,5780,2022,NCRB Crime in India - 2021,full_year,Post-lockdown resumption of commerce and transit.
+2022,298988,509,1212,1785,15820,218200,3954,68,6120,2085,NCRB Crime in India - 2022,full_year,Most recent published comprehensive NCRB Crime in India series.

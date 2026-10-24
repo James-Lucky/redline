@@ -1,10 +1,10 @@
 export { Sidebar } from "./Sidebar";
 export { Topbar } from "./Topbar";
 export { MetricCard, type MetricCardProps } from "./MetricCard";
-export { OrdersByTime } from "./OrdersByTime";
-export { MonthlySalesChart, CrimeTrendChart } from "./CrimeChart";
-export { SalesByCountry, GeographicPreview } from "./Geography";
-export { TopProductSales } from "./TopProductSales";
+export { OrdersByTime, CrimeCategoryHeatmap } from "./OrdersByTime";
+export { CrimeChart, MonthlySalesChart, CrimeTrendChart } from "./CrimeChart";
+export { Geography, SalesByCountry, GeographicPreview } from "./Geography";
+export { TopProductSales, DistrictRankings } from "./TopProductSales";
 export { Analytics, AiAnalyst } from "./Analytics";
 export { Filters } from "./Filters";
 export { DataIntegrity } from "./DataIntegrity";

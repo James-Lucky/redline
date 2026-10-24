@@ -5,8 +5,7 @@ import { useState } from "react";
 const days = ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"];
 const times = ["9 am", "10 am", "11 am", "12 pm", "1 pm", "2 pm", "3 pm"];
 
-// Heatmap data representing order density (0: <200, 1: 200+, 2: 500+, 3: 1000+, 4: 2000+)
-// Matches the circular/diamond heat concentration around 12pm-1pm Wed-Thu-Fri seen in the design
+// Heatmap density matrix matching the reference visual
 const matrix = [
   // 9 am
   [0, 0, 0, 0, 0, 0, 0],
@@ -50,14 +49,16 @@ export function OrdersByTime() {
   const [hoveredCell, setHoveredCell] = useState<{
     day: string;
     time: string;
-    orders: string;
+    incidents: string;
   } | null>(null);
 
   return (
     <div className="flex flex-col justify-between rounded-2xl border border-[#232630] bg-[#16181d] p-5">
       {/* Header & Legend */}
       <div className="flex flex-wrap items-center justify-between gap-3 mb-4">
-        <h3 className="text-[14px] font-semibold text-white">Orders by time</h3>
+        <h3 className="text-[14px] font-semibold text-white font-heading">
+          Orders by time
+        </h3>
         <div className="flex items-center gap-3 text-[10px] text-[#717886]">
           {legendLevels.map((lvl) => (
             <div key={lvl.label} className="flex items-center gap-1.5">
@@ -84,7 +85,7 @@ export function OrdersByTime() {
                 {/* 7 Days Columns for this Time */}
                 {days.map((day, colIdx) => {
                   const level = matrix[rowIdx][colIdx];
-                  const approxOrders =
+                  const approxIncidents =
                     level === 4
                       ? "2,420 orders"
                       : level === 3
@@ -99,7 +100,7 @@ export function OrdersByTime() {
                     <div
                       key={`${time}-${day}`}
                       onMouseEnter={() =>
-                        setHoveredCell({ day, time, orders: approxOrders })
+                        setHoveredCell({ day, time, incidents: approxIncidents })
                       }
                       onMouseLeave={() => setHoveredCell(null)}
                       className={`relative aspect-square cursor-pointer rounded-md transition-all hover:ring-2 hover:ring-white/40 ${getCellColor(
@@ -125,13 +126,13 @@ export function OrdersByTime() {
         </div>
       </div>
 
-      {/* Hover info or subtle status */}
+      {/* Hover info */}
       <div className="mt-3 min-h-[18px] text-[10px] text-[#717886]">
         {hoveredCell ? (
           <span className="text-white">
             {hoveredCell.day} at {hoveredCell.time} —{" "}
-            <span className="text-[#ff5530] font-semibold">
-              {hoveredCell.orders}
+            <span className="text-[#ff5038] font-semibold">
+              {hoveredCell.incidents}
             </span>
           </span>
         ) : (
@@ -141,3 +142,6 @@ export function OrdersByTime() {
     </div>
   );
 }
+
+export const CrimeCategoryHeatmap = OrdersByTime;
+export default OrdersByTime;

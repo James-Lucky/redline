@@ -1,4 +1,5 @@
 @import "tailwindcss";
+
 @theme {
   --font-heading: var(--font-manrope);
   --font-sans: var(--font-inter);
@@ -9,6 +10,7 @@
   --foreground: #ffffff;
   --card: #16181d;
   --card-border: #23272f;
+  --sidebar: #121417;
   --accent-coral: #ff5530;
   --accent-indigo: #5d6b98;
 }
@@ -38,7 +40,6 @@ p,
   font-family: var(--font-inter), -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
 }
 
-
 /* Custom sleek dark scrollbar */
 ::-webkit-scrollbar {
   width: 6px;
@@ -58,3 +59,7 @@ p,
   background: #343944;
 }
 
+.focus-ring:focus-visible {
+  outline: 2px solid #ff5530;
+  outline-offset: 2px;
+}

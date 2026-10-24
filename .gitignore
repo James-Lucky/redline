@@ -31,3 +31,13 @@ Thumbs.db
 
 # Folders
 /docs/
+
+# TypeScript / build caches
+*.tsbuildinfo
+
+# Large raw datasets and archives (>50MB, not required at runtime)
+data/raw/boundaries/
+*.zip
+*.GeoJSON
+!data/processed/*.geojson
+!client/public/data/*.geojson

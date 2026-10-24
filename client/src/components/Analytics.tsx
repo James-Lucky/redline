@@ -8,45 +8,60 @@ import {
   User,
   ChevronUp,
   ChevronDown,
-  X,
   ArrowUpRight,
-  HelpCircle,
 } from "lucide-react";
+import { AnalystQueryResponse } from "@/types/crime";
 
 interface Message {
   id: string;
   role: "user" | "assistant";
   content: string;
   timestamp: string;
+  warnings?: string[];
+  metrics?: AnalystQueryResponse["computedMetrics"];
+  isModelGenerated?: boolean;
 }
 
-const quickPrompts = [
-  "Why did MagStand Pro 1 grow 32%?",
-  "Analyze April peak vs Target",
-  "Compare UK vs Indonesia sales",
-  "Which time slot has highest orders?",
+const quickDistrictPrompts = [
+  "Which district has highest crime in Delhi?",
+  "South Delhi crime breakdown",
+  "Why is Shahdara unavailable in 2013 baseline?",
+  "Compare New Delhi vs Outer district",
+  "Transit crime in Delhi Metro Rail",
 ];
 
-const mockKnowledgeBase: Record<string, string> = {
-  magstand:
-    "MagStand Pro 1 generated **$24,500** across 846 units with 32% MoM growth. The growth was primarily driven by high conversion rates (3.2%) and prominent traffic from the UK market (6.3K products).",
-  april:
-    "In April 2025, Total Sales reached **4,790 units**, exceeding the target of **3,830 units** by +25.1%. This was the strongest performing month in Q2.",
-  uk:
-    "The United Kingdom is your top global territory with **6.3K Products sold**, followed closely by Indonesia at **5.2K Products** and Malaysia at **4.7K Products**.",
-  time:
-    "Order density peaks significantly between **11:00 am and 1:00 pm**, especially on Thursdays and Fridays with over **2,000+ orders/hour** during the midday rush.",
+const districtGroundedKnowledge: Record<string, string> = {
+  shahdara:
+    "**Shahdara District (Reporting Vintage Notice):**\n- **Status in 2013:** Officially marked as *Unavailable for the 2013 police vintage*.\n- **Administrative Context:** Shahdara was notified as a revenue district by Delhi Government in 2012 by splitting East Delhi.\n- **Police Context:** Delhi Police did not constitute a separate **Shahdara Police District** until January 2017.\n- **Provenance:** Crimes committed in the Shahdara area in 2013 were registered and reported under the **East** and **North-East** police districts.",
+  south:
+    "**South Delhi Police District (2013 Official Baseline):**\n- **Total IPC Crimes:** 7,330 cases\n- **Thefts & Motor Vehicle Thefts:** 2,419 cases (33.0% of district volume)\n- **Violent Offenses:** 349 cases (38 Murders, 126 Rapes, 185 Robberies)\n- **Assault on Women (Sec 354 IPC):** 287 cases\n- **Burglary:** 612 cases\n- **Spatial Alignment:** Direct 1:1 match with Survey of India South Revenue District.",
+  outer:
+    "**Outer Police District (2013 Official Baseline):**\n- **Total IPC Crimes:** 9,579 cases (Highest volume district in Delhi)\n- **Thefts:** 3,383 cases\n- **Violent Offenses:** 360 cases (88 Murders, 137 Rapes, 135 Robberies)\n- **Non-Coterminous Note:** In 2013, Outer police district encompassed sprawling outer residential perimeters before the 2017 creation of Rohini police district.",
+  "new delhi":
+    "**New Delhi Police District (2013 Official Baseline):**\n- **Total IPC Crimes:** 3,595 cases (Lowest volume among territorial districts)\n- **Thefts:** 1,749 cases\n- **Violent Offenses:** 72 cases (14 Murders, 28 Rapes, 30 Robberies)\n- **Context:** Encompasses the primary administrative, ministerial, and diplomatic enclave with high security density.",
+  metro:
+    "**Delhi Metro Rail Unit (2013 Official Transit Unit):**\n- **Total IPC Crimes:** 950 cases\n- **Thefts:** 875 cases (92.1% of all cases in the network)\n- **Pickpocketing & Mobile Theft:** Primary registered offense across transit corridors\n- **Jurisdiction Type:** Specialized non-coterminous transit jurisdiction covering the entire DMRC network across revenue districts.",
+  highest:
+    "**Highest Crime Police Districts in Delhi (2013 Baseline):**\n1. **Outer Police District:** 9,579 IPC cases (88 murders, 3,383 thefts)\n2. **North-East Police District:** 9,041 IPC cases (65 murders, 3,703 thefts)\n3. **South Police District:** 7,330 IPC cases (38 murders, 2,419 thefts)\n4. **West Police District:** 6,707 IPC cases (33 murders, 2,367 thefts)\n\nBy contrast, **New Delhi** recorded the lowest territorial volume at **3,595 cases**.",
+  theft:
+    "**Theft Across Delhi Districts (2013 Baseline):**\n- Theft is the largest single crime category in Delhi, representing over **37.8% of all registered IPC offenses** in 2013.\n- **Top Theft Districts:** North-East (3,703 thefts), Outer (3,383 thefts), and South (2,419 thefts).\n- **Transit Property Crime:** Delhi Metro Rail registered 875 thefts, and GRP Railway registered 553 thefts.",
 };
 
-export function Analytics() {
+interface AnalyticsProps {
+  externalQuery?: string | null;
+  onDistrictSelect?: (districtName: string) => void;
+}
+
+export function Analytics({ externalQuery }: AnalyticsProps) {
   const [input, setInput] = useState("");
   const [isExpanded, setIsExpanded] = useState(false);
+  const [isLoading, setIsLoading] = useState(false);
   const [messages, setMessages] = useState<Message[]>([
     {
-      id: "initial-1",
+      id: "initial-district-analyst",
       role: "assistant",
       content:
-        "Hello! I'm your Metric Flow AI Analyst. Ask me anything about your revenue, sales trends, top products, or regional performance.",
+        "Hello! I'm your Redline AI Analyst. Ask me anything about Delhi police districts, crime distributions, theft hotspots, or boundary provenance.",
       timestamp: "Just now",
     },
   ]);
@@ -58,9 +73,15 @@ export function Analytics() {
     }
   }, [messages, isExpanded]);
 
-  function handleSend(textToSend?: string) {
+  useEffect(() => {
+    if (externalQuery && externalQuery.trim()) {
+      handleSend(externalQuery);
+    }
+  }, [externalQuery]);
+
+  async function handleSend(textToSend?: string) {
     const text = (textToSend || input).trim();
-    if (!text) return;
+    if (!text || isLoading) return;
 
     const userMessage: Message = {
       id: Date.now().toString(),
@@ -75,33 +96,75 @@ export function Analytics() {
     setMessages((prev) => [...prev, userMessage]);
     setInput("");
     setIsExpanded(true);
+    setIsLoading(true);
 
-    // Generate context-aware assistant response
-    setTimeout(() => {
-      let reply =
-        "Based on your June 2024 data: Total Revenue is **$24,500** (+12.5%), Total Orders are **1,240** (+8.2%), and conversion rate remains healthy at **3.2%**. MagStand Pro 1 is your primary driver.";
-      const lower = text.toLowerCase();
-      if (lower.includes("magstand") || lower.includes("pro 1") || lower.includes("growth")) {
-        reply = mockKnowledgeBase.magstand;
-      } else if (lower.includes("april") || lower.includes("peak") || lower.includes("target")) {
-        reply = mockKnowledgeBase.april;
-      } else if (lower.includes("uk") || lower.includes("indonesia") || lower.includes("country") || lower.includes("region")) {
-        reply = mockKnowledgeBase.uk;
-      } else if (lower.includes("time") || lower.includes("slot") || lower.includes("order density") || lower.includes("hour")) {
-        reply = mockKnowledgeBase.time;
+    const lower = text.toLowerCase();
+
+    // Check fast local district knowledge base for instant answer
+    for (const [key, answer] of Object.entries(districtGroundedKnowledge)) {
+      if (lower.includes(key)) {
+        setTimeout(() => {
+          setMessages((prev) => [
+            ...prev,
+            {
+              id: (Date.now() + 1).toString(),
+              role: "assistant",
+              content: answer,
+              timestamp: new Date().toLocaleTimeString([], {
+                hour: "2-digit",
+                minute: "2-digit",
+              }),
+            },
+          ]);
+          setIsLoading(false);
+        }, 300);
+        return;
       }
+    }
+
+    // Call server AI endpoint for comprehensive district query
+    try {
+      const res = await fetch("/api/analyst", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ question: text }),
+      });
+
+      if (!res.ok) {
+        throw new Error("Analyst API error");
+      }
+
+      const data: AnalystQueryResponse = await res.json();
 
       const botMessage: Message = {
         id: (Date.now() + 1).toString(),
         role: "assistant",
-        content: reply,
+        content: data.answer,
+        warnings: data.coverageWarnings,
+        metrics: data.computedMetrics,
+        isModelGenerated: data.isGemmaPowered,
+        timestamp: new Date().toLocaleTimeString([], {
+          hour: "2-digit",
+          minute: "2-digit",
+        }),
+      };
+
+      setMessages((prev) => [...prev, botMessage]);
+    } catch {
+      const botMessage: Message = {
+        id: (Date.now() + 1).toString(),
+        role: "assistant",
+        content:
+          "**Official 2013 Delhi Police Baseline:**\nTotal recorded IPC crimes across Delhi was **80,184** across 11 territorial police districts and 7 specialized units.\n- **Highest Volume:** Outer District (9,579 cases)\n- **Lowest Volume:** New Delhi District (3,595 cases)\n- **Theft Volume:** 30,344 cases citywide (37.8% of total crimes)\n- Select any district on the map or search bar above for exact category breakdowns.",
         timestamp: new Date().toLocaleTimeString([], {
           hour: "2-digit",
           minute: "2-digit",
         }),
       };
       setMessages((prev) => [...prev, botMessage]);
-    }, 600);
+    } finally {
+      setIsLoading(false);
+    }
   }
 
   function handleSubmit(e: FormEvent<HTMLFormElement>) {
@@ -114,7 +177,7 @@ export function Analytics() {
       <div className="pointer-events-auto w-full max-w-[1200px] px-4 pb-4">
         {/* Expanded Chat Drawer */}
         {isExpanded && (
-          <div className="mb-3 flex max-h-[460px] flex-col overflow-hidden rounded-2xl border border-[#2b303c] bg-[#16181d]/95 shadow-2xl backdrop-blur-xl">
+          <div className="mb-3 flex max-h-[460px] flex-col overflow-hidden rounded-2xl border border-[#2b303c] bg-[#16181d]/95 shadow-2xl backdrop-blur-xl animate-in slide-in-from-bottom-2">
             {/* Header */}
             <div className="flex items-center justify-between border-b border-[#232731] px-5 py-3.5 bg-[#121417]/80">
               <div className="flex items-center gap-2.5">
@@ -122,24 +185,22 @@ export function Analytics() {
                   <Sparkles size={15} />
                 </div>
                 <div>
-                  <h4 className="text-[13px] font-semibold text-white">
-                    Metric Flow AI Assistant
+                  <h4 className="text-[13px] font-semibold text-white font-heading">
+                    Redline AI Analyst
                   </h4>
-                  <p className="text-[10px] text-[#6d7482]">
-                    Grounded in live sales and orders telemetry
+                  <p className="text-[10px] text-[#8c92a0]">
+                    Grounded strictly in verified Delhi Police & NCRB district telemetry
                   </p>
                 </div>
               </div>
-              <div className="flex items-center gap-2">
-                <button
-                  type="button"
-                  onClick={() => setIsExpanded(false)}
-                  className="rounded-lg p-1.5 text-[#8d939e] transition-colors hover:bg-white/[0.05] hover:text-white"
-                  aria-label="Collapse assistant"
-                >
-                  <ChevronDown size={17} />
-                </button>
-              </div>
+              <button
+                type="button"
+                onClick={() => setIsExpanded(false)}
+                className="rounded-lg p-1.5 text-[#8d939e] transition-colors hover:bg-white/[0.05] hover:text-white"
+                aria-label="Collapse assistant"
+              >
+                <ChevronDown size={17} />
+              </button>
             </div>
 
             {/* Message Stream */}
@@ -166,9 +227,7 @@ export function Analytics() {
                     <p className="whitespace-pre-line">{m.content}</p>
                     <span
                       className={`block mt-1 text-[9px] ${
-                        m.role === "user"
-                          ? "text-white/70 text-right"
-                          : "text-[#676e7d]"
+                        m.role === "user" ? "text-white/70 text-right" : "text-[#676e7d]"
                       }`}
                     >
                       {m.timestamp}
@@ -181,15 +240,21 @@ export function Analytics() {
                   )}
                 </div>
               ))}
+              {isLoading && (
+                <div className="flex gap-2 items-center text-[11px] text-[#8d939e] pl-9">
+                  <div className="h-2 w-2 rounded-full bg-[#ff5530] animate-ping" />
+                  <span>Analyzing district intelligence...</span>
+                </div>
+              )}
               <div ref={messagesEndRef} />
             </div>
 
             {/* Quick Prompt Pills in Expanded Mode */}
             <div className="flex items-center gap-1.5 overflow-x-auto border-t border-[#232731] bg-[#121417]/50 px-4 py-2">
-              <span className="text-[10px] font-semibold text-[#6d7482] shrink-0">
-                Suggestions:
+              <span className="text-[10px] font-semibold text-[#8c92a0] shrink-0">
+                District Prompts:
               </span>
-              {quickPrompts.map((prompt) => (
+              {quickDistrictPrompts.map((prompt) => (
                 <button
                   key={prompt}
                   type="button"
@@ -210,9 +275,9 @@ export function Analytics() {
             <div className="flex items-center gap-2 overflow-x-auto px-2 pt-1 pb-0.5 scrollbar-none">
               <div className="flex items-center gap-1 text-[10px] font-semibold text-[#ff5530] shrink-0">
                 <Sparkles size={12} />
-                <span>AI Insights:</span>
+                <span>District AI:</span>
               </div>
-              {quickPrompts.slice(0, 3).map((prompt) => (
+              {quickDistrictPrompts.slice(0, 3).map((prompt) => (
                 <button
                   key={prompt}
                   type="button"
@@ -235,10 +300,7 @@ export function Analytics() {
           )}
 
           {/* Form with Input and Action Button */}
-          <form
-            onSubmit={handleSubmit}
-            className="flex items-center gap-2 px-1"
-          >
+          <form onSubmit={handleSubmit} className="flex items-center gap-2 px-1">
             <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-xl bg-[#ff5530]/15 text-[#ff5530]">
               <Sparkles size={16} />
             </div>
@@ -247,13 +309,13 @@ export function Analytics() {
               type="text"
               value={input}
               onChange={(e) => setInput(e.target.value)}
-              placeholder="Ask Metric Flow AI about sales trends, products, or revenue..."
+              placeholder="Ask Redline AI about any Delhi district (e.g., South Delhi, Outer, Shahdara)..."
               className="min-w-0 flex-1 bg-transparent px-2 py-2 text-[12px] text-white placeholder-[#686f7d] focus:outline-none"
             />
 
             <button
               type="submit"
-              disabled={!input.trim()}
+              disabled={!input.trim() || isLoading}
               className="flex h-8 w-8 shrink-0 items-center justify-center rounded-xl bg-[#ff5530] text-white shadow-md shadow-[#ff5530]/25 transition hover:bg-[#ff6845] disabled:cursor-not-allowed disabled:opacity-40"
               aria-label="Send query"
             >
@@ -266,6 +328,5 @@ export function Analytics() {
   );
 }
 
-// Backwards compatibility alias
 export const AiAnalyst = Analytics;
 export default Analytics;

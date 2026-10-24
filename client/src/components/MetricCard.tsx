@@ -9,6 +9,8 @@ export type MetricCardProps = {
   change: string;
   isPositive?: boolean;
   timeRange?: string;
+  trendDescription?: string;
+  definition?: string;
 };
 
 export function MetricCard({
@@ -43,7 +45,7 @@ export function MetricCard({
             {currencyPrefix}
           </span>
         )}
-        <span className="text-[28px] font-bold tracking-tight text-white">
+        <span className="text-[28px] font-bold tracking-tight text-white font-heading">
           {value}
         </span>
       </div>
@@ -55,3 +57,5 @@ export function MetricCard({
     </div>
   );
 }
+
+export default MetricCard;
